@@ -10,12 +10,24 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from tqdm import tqdm
+from dotenv import load_dotenv
 
-from repalette.constants import BASE_DATA_DIR, DEFAULT_RAW_DATABASE, RAW_DATA_DIR, RGB_IMAGES_DIR
-from repalette.db import image_url_to_name
-from repalette.db.raw import RAWBase, RawImage
+load_dotenv()
 
-DESIGN_SEEDS_PAGES_ROOT = r"https://www.design-seeds.com/blog/page/"
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DATA_DIR = os.path.join(ROOT_DIR, "data")
+RAW_DATA_DIR = os.path.join(BASE_DATA_DIR, "raw")
+RGB_IMAGES_DIR = os.path.join(BASE_DATA_DIR, "rgb")
+RAW_DATABASE_PATH = os.path.join(BASE_DATA_DIR, "raw.sqlite")
+DEFAULT_RAW_DATABASE = f"sqlite:///{RAW_DATABASE_PATH}"
+
+import sys
+sys.path.insert(0, "../../")
+# from repalette.constants import BASE_DATA_DIR, DEFAULT_RAW_DATABASE, RAW_DATA_DIR, RGB_IMAGES_DIR
+from db import image_url_to_name
+from db.raw import RAWBase, RawImage
+
+DESIGN_SEEDS_PAGES_ROOT = r"https://www.design-seeds.com/search/label/pinks"
 
 
 def get_image_urls_and_palettes():
@@ -27,6 +39,7 @@ def get_image_urls_and_palettes():
     bar = tqdm(desc=f"Parsing... skipped: [{skipped}]")
     response = requests.get(DESIGN_SEEDS_PAGES_ROOT + str(i))
     bar.update(n=1)
+    print(response)
     while response.status_code != 404:
         bs = BeautifulSoup(response.content, "html.parser")
         posts = bs.find_all(class_="entry-content")
@@ -42,10 +55,13 @@ def get_image_urls_and_palettes():
 
             image_urls.append(image_url)
             palettes.append(palette)
-
+            print(image_urls)
         bar.update(n=1)
 
         i += 1
+        if i == 4:
+            break
+        print(i)
         response = requests.get(DESIGN_SEEDS_PAGES_ROOT + str(i))
 
     return image_urls, palettes
@@ -67,6 +83,7 @@ if __name__ == "__main__":
 
     def download_image_to_database(image_data):
         url, palette = image_data
+        print(image_data)
         name = image_url_to_name(url)
 
         # create a database Session
@@ -91,7 +108,7 @@ if __name__ == "__main__":
         image_urls,
         palettes,
     ) = get_image_urls_and_palettes()
-
+    print(image_urls)
     with Pool(args.num_workers) as pool:
         with tqdm(
             desc="Downloading",

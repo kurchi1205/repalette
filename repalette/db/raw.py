@@ -3,8 +3,9 @@ import os
 
 from sqlalchemy import Column, DateTime, Integer, MetaData, String
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
-
-from repalette.constants import RAW_DATA_DIR
+import sys
+sys.path.insert(0, "../")
+from constants import RAW_DATA_DIR
 
 raw_meta = MetaData()
 

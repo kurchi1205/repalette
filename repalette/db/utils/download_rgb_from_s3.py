@@ -4,15 +4,27 @@ import zipfile
 
 import boto3
 from botocore.exceptions import ClientError
+from dotenv import load_dotenv
 
-from repalette.constants import (
-    BASE_DATA_DIR,
-    RGB_DATABASE_PATH,
-    ROOT_DIR,
-    S3_BUCKET_NAME,
-    S3_RGB_DATABASE_PATH,
-    S3_RGB_IMAGES_PATH,
-)
+load_dotenv()
+
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DATA_DIR = os.path.join(ROOT_DIR, "data")
+RGB_DATABASE_PATH = os.path.join(BASE_DATA_DIR, "rgb.sqlite")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+S3_BASE_DATA_DIR = "data/"
+S3_RGB_DATABASE_PATH = os.path.join(S3_BASE_DATA_DIR, "rgb.sqlite")
+S3_RGB_IMAGES_PATH = os.path.join(S3_BASE_DATA_DIR, "rgb.zip")
+
+
+# from repalette.constants import (
+#     BASE_DATA_DIR,
+#     RGB_DATABASE_PATH,
+#     ROOT_DIR,
+#     S3_BUCKET_NAME,
+#     S3_RGB_DATABASE_PATH,
+#     S3_RGB_IMAGES_PATH,
+# )
 
 
 def download_from_s3():
